@@ -8,6 +8,7 @@ import {
   UpdateBillInput,
 } from './bills.schemas'
 import { BillsRepository } from './bills.repository'
+import { TransactionsService } from '../transactions/transactions.service'
 
 type BillResponse = {
   id: string
@@ -24,7 +25,10 @@ type BillResponse = {
 
 @Injectable()
 export class BillsService {
-  constructor(private readonly billsRepository: BillsRepository) {}
+  constructor(
+    private readonly billsRepository: BillsRepository,
+    private readonly transactionsService: TransactionsService,
+  ) {}
 
   async listBills(user: AuthenticatedUser, query: ListBillsQuery) {
     const bills = await this.billsRepository.findByUser(user.uid, query)
@@ -80,6 +84,15 @@ export class BillsService {
 
     if (!bill) {
       throw new NotFoundException('Bill not found')
+    }
+
+    if (input.status === BillStatus.paid) {
+      await this.transactionsService.createTransaction(user, {
+        description: bill.description,
+        amount: bill.amount.toString(),
+        type: 'expense',
+        category: bill.category,
+      })
     }
 
     return this.serializeBill(bill)
