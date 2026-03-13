@@ -1,0 +1,33 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fintrack-api:latest
+    env_file:
+      - .env.production
+    ports:
+      - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: sh -c "npm run prisma:migrate:deploy && npm run start:prod"
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fintrack
+      POSTGRES_PASSWORD: fintrack
+      POSTGRES_DB: fintrack
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fintrack -d fintrack']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
