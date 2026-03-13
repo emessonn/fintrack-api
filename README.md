@@ -139,11 +139,10 @@ Protegidos (Bearer token):
 
 ## Deploy
 
-### Render com Docker
+### Render Web Service (sem Docker)
 
 Este repo ja inclui:
 
-- `Dockerfile`
 - `render.yaml`
 
 Fluxo resumido:
@@ -154,10 +153,12 @@ Fluxo resumido:
 4. Configure env vars do Firebase e `FRONTEND_ORIGIN`
 5. Deploy
 
-O container roda automaticamente:
+O Render executa automaticamente:
 
 ```bash
-npm run prisma:migrate:deploy && npm run start:prod
+npm ci && npm run prisma:generate && npm run build
+npm run prisma:migrate:deploy
+npm run start:prod
 ```
 
 Consulte instrucoes detalhadas em `DEPLOY.md`.

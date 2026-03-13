@@ -1,12 +1,12 @@
 # Deploy em Produção
 
-## Opção 1: Render com Docker (recomendado para simplicidade)
+## Opção 1: Render Web Service sem Docker (recomendado)
 
 Este repositório já contém um Blueprint em `render.yaml`.
 
 ### 1. Subir código no GitHub
 
-Garanta que o repositório remoto contenha os arquivos mais recentes (`Dockerfile`, `render.yaml`).
+Garanta que o repositório remoto contenha os arquivos mais recentes, especialmente `render.yaml`.
 
 ### 2. Criar stack no Render pelo Blueprint
 
@@ -19,7 +19,7 @@ No Render:
 
 Isso cria:
 
-- 1 Web Service (`fintrack-api`) com runtime Docker.
+- 1 Web Service (`fintrack-api`) com runtime Node.
 - 1 PostgreSQL gerenciado (`fintrack-db`).
 
 ### 3. Preencher variáveis obrigatórias
@@ -34,16 +34,17 @@ No serviço `fintrack-api`, configure:
 
 `DATABASE_URL` já será ligado automaticamente ao banco do Render via Blueprint.
 
-### 4. Deploy
+### 4. Build, migration e start no Render
 
-Ao aplicar o Blueprint, o Render fará build e deploy.
-O container inicia com:
+Ao aplicar o Blueprint, o Render executa automaticamente:
 
 ```bash
-npm run prisma:migrate:deploy && npm run start:prod
+npm ci && npm run prisma:generate && npm run build
+npm run prisma:migrate:deploy
+npm run start:prod
 ```
 
-Ou seja, migrações rodam antes da API subir.
+Ou seja, build acontece no deploy e as migrações rodam antes da API subir.
 
 ### 5. Validar saúde
 
@@ -59,7 +60,11 @@ Resposta esperada:
 { "status": "ok", "timestamp": "2026-01-01T00:00:00.000Z" }
 ```
 
-## Opção 2: VPS com Docker Compose
+## Opção 2: Render com Docker
+
+Se quiser usar Docker no Render, mantenha `Dockerfile` e configure o serviço em runtime Docker.
+
+## Opção 3: VPS com Docker Compose
 
 ### 1. Pré-requisitos no servidor
 

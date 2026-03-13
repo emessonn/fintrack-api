@@ -1,9 +1,12 @@
 services:
   - type: web
     name: fintrack-api
-    runtime: docker
+    runtime: node
     plan: starter
     autoDeploy: true
+    buildCommand: npm ci && npm run prisma:generate && npm run build
+    preDeployCommand: npm run prisma:migrate:deploy
+    startCommand: npm run start:prod
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
